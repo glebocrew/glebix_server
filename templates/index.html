@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link href="{{ url_for('static', filename='styles/styles.css') }}" rel="stylesheet">
+
+        <title>glebix.server</title>
+    </head>
+    <style>
+        @font-face {
+            font-family: "code";
+            src: url("{{ url_for('static', filename='fonts/code.ttf') }}");
+        }
+
+        @font-face {
+            font-family: "code-black";
+            src: url("{{ url_for('static', filename='fonts/code_black.ttf') }}");
+        }
+    </style>
+
+    <body>
+        <h1 class="h1">glebix workspace</h1>
+        <h1 class="h2">Indie.velopement</h1>
+    </body>
+</html>
