@@ -11,6 +11,13 @@ conn_params= {
     "database" : "glebix"
 }
 
+queries = {
+    "username": "SELECT username FROM users WHERE username = ?",
+    "password": "SELECT password FROM users WHERE username = ?",
+    "delete": "DELETE FROM users WHERE username = ?",
+    "add": "INSERT INTO users (username, password) VALUES (?, ?)"
+}
+
 
 class MariaConn:
     def __init__(self):
@@ -21,9 +28,10 @@ class MariaConn:
         self.cursor = self.connection.cursor()
 
     def check_password(self, username, password):
-        if not self.is_valid(username):
-            self.cursor.execute(f"SELECT password FROM users WHERE username='{username}'")
+        if not self.invalid(username) and not (" " in password):
+            self.cursor.execute(queries["password"], tuple([username]))
             pwd = self.cursor.fetchone()
+
             pwd_hash = sha256()
             pwd_hash.update(password.encode("utf-8"))
 
@@ -36,25 +44,26 @@ class MariaConn:
                 return False
         return False
 
-    def is_valid(self, username):
-        if ' ' in username:
-            return False
-        self.cursor.execute(f"SELECT * FROM users WHERE username='{username}'")
-
-        if self.cursor.fetchone() != None:
-            return False
-        else:
+    def invalid(self, username):
+        if " " in username or "'" in username:
             return True
+        
+        self.cursor.execute(queries["username"], tuple([username]))
+        if self.cursor.fetchone() == None:
+            return True
+        else:
+            return False
 
     def add(self, username, password):
         pwd_hash = sha256()
         pwd_hash.update(password.encode("utf-8"))
 
-        self.cursor.execute(f"INSERT INTO users (username, password) VALUES " + str(username) + " " + str(pwd_hash.hexdigest()) + ";")
+        self.cursor.execute(queries['add'], (username, pwd_hash.hexdigest()))
+
         self.connection.commit()
 
     def delete(self, username):
-        self.cursor.execute(f"DELETE FROM users WHERE (username='{username}')")
+        self.cursor.execute(queries['delete'], tuple([username]))
         self.connection.commit()
 
 
@@ -76,16 +85,16 @@ maria.connect(conn_params)
 # maria.return_table()
 # maria.delete("glebocrew")
 
-# if (input("debug?")).lower() == "y":
-#     while True:
-#         commandlet, operator = map(str, input().split(sep=" "))
+if (input("debug?")).lower() == "y":
+    while True:
+        commandlet, operator = map(str, input().split(sep=" "))
 
-#         if commandlet == "del":
-#             maria.delete(operator)
-#         elif commandlet == "ret":
-#             maria.return_table()
-#         else:
-#             print("Дичь!")
+        if commandlet == "del":
+            maria.delete(operator)
+        elif commandlet == "ret":
+            maria.return_table()
+        else:
+            print("Дичь!")
 
 maria.close()
 

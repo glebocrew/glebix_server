@@ -31,7 +31,7 @@ def signin():
         password = request.form.get("password")
         repeat = request.form.get("repeat")
 
-        if maria.is_valid(username):
+        if maria.invalid(username):
             if password == repeat:
                 if password != "" and username != "":
                     for p in password:
