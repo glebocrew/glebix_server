@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link href="{{ url_for('static', filename='styles/styles.css') }}" rel="stylesheet">
+
+        <title>glebix.server</title>
+    </head>
+    <style>
+        @font-face {
+            font-family: "code";
+            src: url("{{ url_for('static', filename='fonts/code.ttf') }}");
+        }
+
+        @font-face {
+            font-family: "code-black";
+            src: url("{{ url_for('static', filename='fonts/code_black.ttf') }}");
+        }
+
+        @font-face {
+            font-family: "code-light";
+            src: url("{{ url_for('static', filename='fonts/code_light.ttf') }}");
+        }
+    </style>
+
+    <body>
+        <h1 class="h1">glebix workspace</h1>
+        <h1 class="h2">Indie.velopement</h1>
+
+        <form method="POST" class="form">
+            <h1 class="h2">username</h1>
+            <input type="text" value="" class="input" name="username">
+
+            <h1 class="h2">password</h1>
+            <input type="password" value="" class="input" name="password">
+
+            <button class="button" type="submit">log in</button>
+            
+            {% if message %}
+            <h1 class="h2">{{ message }}</h1>
+            <h1 class="h3">If you don't have an account:<br><a href="/signin">sign in</a></h1>
+            {% endif %}
+        </form>
+    </body>
+</html>
