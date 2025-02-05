@@ -14,6 +14,7 @@ conn_params= {
     "database" : "glebix"
 }
 
+
 app = Flask("__name__",
             static_folder="static")
 
@@ -37,6 +38,7 @@ def signin():
                     for p in password:
                         if p != " ":
                             maria.add(username, password)
+                            maria.add_code(username, maria._create_passcode())
                             print("logged!")
                             return redirect("/login")
                     else:
@@ -55,9 +57,10 @@ def login():
     if request.method == 'POST':
         username = request.form.get("username")
         password = request.form.get("password")
+        passcode = request.form.get("passcode")
 
 
-        if maria.check_password(username, password):
+        if maria.check_password(username, password) and maria.check_code(username, passcode):
             return render_template("home.html")
         else:
             return render_template("login.html", message="Incorrect data!")

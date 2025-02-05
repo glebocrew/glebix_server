@@ -1,4 +1,5 @@
 import mariadb
+import random
 import os
 
 from hashlib import sha256
@@ -18,10 +19,24 @@ queries = {
     "add": "INSERT INTO users (username, password) VALUES (?, ?)"
 }
 
+queries_for_codes = {
+    "passcode": "SELECT code FROM codes WHERE username = ?",
+    "delete": "DELETE FROM codes WHERE username = ?",
+    "add": "INSERT INTO codes (username, code) VALUES (?, ?)"
+}
+
+alphabet = "mark gleb kuptsov proga list python fullstack developer top programmer of moscow lychse guitar metal 1999 2021 2025 2023 zaurus zaorus hatfield".split(sep=' ')
 
 class MariaConn:
     def __init__(self):
         pass
+
+    def _create_passcode(self):
+        passcode = ""
+        for x in range(0, 5):
+            passcode += random.choice(alphabet)
+
+        return passcode
 
     def connect(self, conn_params: map):
         self.connection = mariadb.connect(**conn_params)
@@ -59,7 +74,6 @@ class MariaConn:
         pwd_hash.update(password.encode("utf-8"))
 
         self.cursor.execute(queries['add'], (username, pwd_hash.hexdigest()))
-
         self.connection.commit()
 
     def delete(self, username):
@@ -67,8 +81,38 @@ class MariaConn:
         self.connection.commit()
 
 
+
+    def add_code(self, username, passcode):
+        self.cursor.execute(queries_for_codes['add'], (username, passcode))
+        self.connection.commit()
+
+    def delete_code(self, username):
+        self.cursor.execute(queries_for_codes['delete'], tuple([username]))
+        self.connection.commit()
+
+    def check_code(self, username, code):
+        if not self.invalid(username) and not (" " in code):
+            self.cursor.execute(queries_for_codes["passcode"], tuple([username]))
+            cd = self.cursor.fetchone()
+
+            print(cd)
+            print(code)
+
+            if code in cd:
+                return True
+            else:
+                return False
+        return False
+
+
+
     def return_table(self):
         self.cursor.execute("SELECT * FROM users")
+        print(self.cursor.fetchall())
+    
+    
+    def return_table_codes(self):
+        self.cursor.execute("SELECT * FROM codes")
         print(self.cursor.fetchall())
 
     def close(self):
@@ -87,14 +131,18 @@ maria.connect(conn_params)
 
 if (input("debug?")).lower() == "y":
     while True:
-        commandlet, operator = map(str, input().split(sep=" "))
-
-        if commandlet == "del":
-            maria.delete(operator)
-        elif commandlet == "ret":
-            maria.return_table()
-        else:
-            print("Дичь!")
+        
+        try:
+            commandlet, operator = map(str, input().split(sep=" "))
+            if commandlet == "del":
+                maria.delete(operator)
+            elif commandlet == "add":
+                maria.add(operator)
+            else:
+                print("Дичь!")
+        except:
+            print(maria.return_table())
+            print(maria.return_table_codes())
 
 maria.close()
 
